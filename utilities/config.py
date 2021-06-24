@@ -11,13 +11,8 @@
 import os
 import pandas as pd
 from glob import glob
-import psutil
 import logging
 from IPython.core.display import HTML
-import findspark
-findspark.init()
-from delta import configure_spark_with_delta_pip
-from pyspark.sql import SparkSession
 from utilities.flights_raw import FlightsRaw
 from utilities.operations import(
     create_stream_writer,
@@ -99,65 +94,3 @@ vars = [
 vars_df = pd.DataFrame(vars).to_html()
 print('vars_df is available as HTML content to display simply run HTML(vars_df)')
 # logging.info('vars_df is available as HTML content to display simply run HTML(vars_df)')
-
-print('Setting up spark configurations.....')
-logging.info('Setting up spark configurations.....')
-# Setting spark configurations
-# Number of cpu cores to be used as the number of shuffle partitions
-num_cpus = psutil.cpu_count()
-# Spark UI port
-spark_ui_port = '4050'
-# Set offHeap Size to 10 GB
-offHeap_size = str(10 * 1024 * 1024 * 1024)
-# Spark Application Name
-spark_app_name = 'lake-house'
-# Builder for spark configurations
-builder = (
-    SparkSession.builder.appName(spark_app_name)
-    .config('spark.sql.extensions', 'io.delta.sql.DeltaSparkSessionExtension')
-    .config('spark.sql.catalog.spark_catalog', 'org.apache.spark.sql.delta.catalog.DeltaCatalog')
-    .config('spark.ui.port', spark_ui_port)
-    .config('spark.sql.shuffle.partitions', num_cpus)
-    .config('spark.sql.adaptive.enabled', True)
-    .config('spark.memory.offHeap.enabled', True)
-    .config('spark.memory.offHeap.size', offHeap_size)
-    .enableHiveSupport()
-)
-# configure spark to use open source delta
-spark = configure_spark_with_delta_pip(builder).getOrCreate()
-
-spark_configurations = [
-    {'Config': 'spark.sql.extensions', 'Value': 'io.delta.sql.DeltaSparkSessionExtension',
-        'Description': 'Using delta io extension'},
-    {'Config': 'spark.sql.catalog.spark_catalog', 'Value': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
-        'Description': 'Setting spark catalog to use DeltaCatalog'},
-    {'Config': 'spark.ui.port', 'Value': spark_ui_port,
-        'Description': 'Spark UI port number'},
-    {'Config': 'spark.sql.shuffle.partitions', 'Value': num_cpus,
-        'Description': 'setting the number of shuffle partitions to the number of cores available'},
-    {'Config': 'spark.sql.adaptive.enabled', 'Value': True,
-        'Description': 'Enabling adaptive query optimization'},
-    {'Config': 'spark.memory.offHeap.enabled', 'Value': True,
-        'Description': 'Enabling offHeap memory'},
-    {'Config': 'spark.memory.offHeap.size', 'Value': offHeap_size,
-        'Description': 'Setting offHeap memory to 10 GB'}
-]
-
-spark_config_df = pd.DataFrame(spark_configurations).to_html()
-print('spark session is now available in the environment as spark\n\
-spark_config_df is available as HTML content to display simply run HTML(spark_config_df)')
-# logging.info('spark session is now available in the environment as spark\n\
-# spark_config_df is available as HTML content to display simply run HTML(spark_config_df)')
-
-# Setting new DB to use
-spark.sql("""
-    CREATE DATABASE IF NOT EXISTS flights_db
-"""
-)
-
-spark.sql("""
-    USE flights_db
-"""
-)
-print("Using flights_db database..")
-# logging.info("Using flights_db database..")
