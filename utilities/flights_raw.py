@@ -112,6 +112,15 @@ class FlightsRaw():
 
 
     def _process_file(self, filepath, temp_folder):
+        """Helper function to actually process file by file we call it from retrive eaither by multiprocessing or normal
+
+        Args:
+            filepath (str): path for the file to process
+            temp_folder (str): path for the temp directory to stage the file before moving to target folder
+
+        Returns:
+            tuple: tuple of (filepath, num_rows, retrived_files) to update the class attributes
+        """
         
         columns = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'DepTime', 'CRSDepTime',
                    'ArrTime', 'CRSArrTime', 'UniqueCarrier', 'FlightNum', 'TailNum',
