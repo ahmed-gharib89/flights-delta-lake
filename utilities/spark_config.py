@@ -16,6 +16,38 @@ import findspark
 findspark.init()
 from delta import configure_spark_with_delta_pip
 from pyspark.sql import SparkSession
+from utilities.operations import(
+    create_stream_writer,
+    read_stream_delta,
+    read_stream_raw,
+    stop_all_streams,
+    stop_named_stream,
+    until_stream_is_ready,
+    register_delta_table,
+    transform_raw,
+    get_flight_schema,
+    transform_flight_bronz,
+    create_or_update_date_table,
+    load_csv_to_dataframe,
+    transform_lookup_airport,
+    transform_lookup_plane
+)
+
+print('importing libraries ....')
+print(
+    """
+Libraries (
+    pandas as pd, psutils, logging, findspark,
+    pyspark.sql.SparkSession, delta.configure_spark_with_delta_pip,
+    HTML, create_stream_writer, read_stream_delta, read_stream_raw,
+    stop_all_streams, stop_named_stream, until_stream_is_ready,
+    register_delta_table, transform_raw, get_flight_schema,
+    create_or_update_date_table, load_csv_to_dataframe,
+    transform_lookup_airport, transform_lookup_plane
+)
+Are available now
+"""
+)
 
 
 print('Setting up spark configurations.....')
@@ -64,8 +96,6 @@ spark_configurations = [
 spark_config_df = pd.DataFrame(spark_configurations).to_html()
 print('spark session is now available in the environment as spark\n\
 spark_config_df is available as HTML content to display simply run HTML(spark_config_df)')
-# logging.info('spark session is now available in the environment as spark\n\
-# spark_config_df is available as HTML content to display simply run HTML(spark_config_df)')
 
 # Setting new DB to use
 spark.sql("""
@@ -78,4 +108,3 @@ spark.sql("""
 """
 )
 print("Using flights_db database..")
-# logging.info("Using flights_db database..")
