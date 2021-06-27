@@ -14,26 +14,12 @@ from glob import glob
 import logging
 from IPython.core.display import HTML
 from utilities.flights_raw import FlightsRaw
-from utilities.operations import(
-    create_stream_writer,
-    read_stream_delta,
-    read_stream_raw,
-    stop_all_streams,
-    stop_named_stream,
-    until_stream_is_ready,
-    register_delta_table,
-    transform_raw
-)
 
 print('importing libraries ....')
 print(
     """
 Libraries (
-    os, pandas as pd, glob, psutils, logging, findspark,
-    pyspark.sql.SparkSession, delta.configure_spark_with_delta_pip,
-    HTML, FlightsRaw, create_stream_writer, read_stream_delta,
-    read_stream_raw, stop_all_streams, stop_named_stream, 
-    until_stream_is_ready, register_delta_table, transform_raw
+    os, pandas as pd, glob,logging, HTML, FlightsRaw
 )
 Are available now
 """
@@ -49,20 +35,28 @@ print('Setting up variables ....')
 logging.info('Setting up variables ....')
 # Setting the path for data source and delta lake
 working_dir = os.getcwd()
-data_source = os.path.join(working_dir, 'data_source')
-delta_lake = os.path.join(working_dir, 'delta_lake')
-flight_raw_path = os.path.join(delta_lake, 'flights_raw')
+data_source = os.path.join(working_dir, 'data_source', '')
+delta_lake = os.path.join(working_dir, 'delta_lake', '')
+flight_raw_path = os.path.join(delta_lake, 'flights_raw', '')
 # Creating the flight raw directory if not exists
 if not os.path.isdir(flight_raw_path):
     os.mkdir(flight_raw_path)
 flight_bronz_path = os.path.join(delta_lake, 'flight_bronz')
 flight_silver_path = os.path.join(delta_lake, 'flight_silver')
 flight_gold_path = os.path.join(delta_lake, 'flight_gold')
+date_gold_path = os.path.join(delta_lake, 'date_gold')
 checkpoints_path = os.path.join(working_dir, 'checkpoints')
+flight_raw_checkpoint = os.path.join(checkpoints_path, "flight_raw", "")
 flight_bronz_checkpoint = os.path.join(checkpoints_path, "flight_bronz")
 flight_silver_checkpoint = os.path.join(checkpoints_path, "flight_silver")
 flight_gold_checkpoint = os.path.join(checkpoints_path, "flight_gold")
 
+flight_raw_data_path = os.path.join(data_source, 'flights_raw', '')
+lookup_tables_path = os.path.join(data_source, 'LookupTables', '')
+l_plane_path = os.path.join(lookup_tables_path, 'L_PLANE.csv')
+l_airport_path = os.path.join(lookup_tables_path, 'L_AIRPORT.csv')
+l_cancelation_path = os.path.join(lookup_tables_path, 'L_CANCELLATION.csv')
+l_unique_carrier_path = os.path.join(lookup_tables_path, 'L_UNIQUE_CARRIERS.csv')
 
 
 # Vriables list of dictionaries to organize and print the variables when loading the configurations
@@ -81,16 +75,32 @@ vars = [
         'Description': 'string path for flight silver data'},
     {'Name': 'flight_gold_path', 'Value': flight_gold_path,
         'Description': 'string path for flight gold data'},
+    {'Name': 'date_gold_path', 'Value': date_gold_path,
+        'Description': 'string path for date gold data'},
     {'Name': 'checkpoints_path', 'Value': checkpoints_path,
         'Description': 'string path for checkpoints directory'},
+    {'Name': 'flight_raw_checkpoint', 'Value': flight_raw_checkpoint,
+        'Description': 'string path for flight raw checkpoint'},
     {'Name': 'flight_bronz_checkpoint', 'Value': flight_bronz_checkpoint,
         'Description': 'string path for flight bronz checkpoint'},
     {'Name': 'flight_silver_checkpoint', 'Value': flight_silver_checkpoint,
         'Description': 'string path for flight silver checkpoint'},
     {'Name': 'flight_gold_checkpoint', 'Value': flight_gold_checkpoint,
-        'Description': 'string path for flight gold checkpoint'}
+        'Description': 'string path for flight gold checkpoint'},
+    {'Name': 'flight_raw_data_path', 'Value': flight_raw_data_path,
+        'Description': 'string path for flight raw data source'},
+    {'Name': 'lookup_tables_path', 'Value': lookup_tables_path,
+        'Description': 'string path for lookup tables directory'},
+    {'Name': 'l_plane_path', 'Value': l_plane_path,
+        'Description': 'string path for plane data csv file'},
+    {'Name': 'l_airport_path', 'Value': l_airport_path,
+        'Description': 'string path for airport data csv file'},
+    {'Name': 'l_cancelation_path', 'Value': l_cancelation_path,
+        'Description': 'string path for cancelation data csv file'},
+    {'Name': 'l_unique_carrier_path', 'Value': l_unique_carrier_path,
+        'Description': 'string path for unique carrier csv file'}
 ]
 
 vars_df = pd.DataFrame(vars).to_html()
 print('vars_df is available as HTML content to display simply run HTML(vars_df)')
-# logging.info('vars_df is available as HTML content to display simply run HTML(vars_df)')
+logging.info('vars_df is available as HTML content to display simply run HTML(vars_df)')
