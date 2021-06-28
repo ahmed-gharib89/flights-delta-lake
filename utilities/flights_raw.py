@@ -15,9 +15,9 @@ from tqdm import tqdm
 import logging
 import shutil
 import psutil
-from multiprocessing import current_process, Pool, cpu_count
-from sys import stdout
+from multiprocessing import cpu_count
 import pickle
+from multiprocessing.pool import ThreadPool
 
 
 log_file = os.path.join(os.getcwd(), "logs.log")
@@ -54,6 +54,10 @@ class FlightsRaw():
         if not self.source:
             print('No source is provided trying to load from latest checkpoint')
             self.load()
+        
+        # Check for targer folder and create it if not exists
+        if not self.target is None and not os.path.isdir(self.target):
+            os.mkdir(self.target)
 
         logging.info('Initialized FlightsRaw Class')
 
@@ -77,41 +81,42 @@ class FlightsRaw():
             num_files = len(self.source)
             print(f"Only {num_files} files left to retrive")
 
+        # Getting total number of steps for the progress bar
+        total = 0
+        for i in range(num_files):
+            fname = self._get_file_name(self.source[i])
+            if fname == '1987':
+                total += 3
+            elif fname == '2018':
+                total += 4
+            elif len(fname) == 6:
+                total += 1
+            else:
+                total += 12
+
         # List of files to process
         files = [self.source[i] for i in range(num_files)]
+        # Initializing progress bar with total number of months in our files
+        progress_bar = tqdm(total=total)
         # if multiprocess is set to True
         if multiprocess:
-            # Setting the arguments list of tuples for processing pool
-            d_args = [(file, temp_folder) for file in files]
             # Set number of threads to the number of cpu cores
             num_workers = cpu_count()
             # Initialize the pool with num workers
-            pool = Pool(processes=num_workers)
-            # Getting the output for updating the class attributes
-            output = pool.starmap(self._process_file, d_args)
+            pool = ThreadPool(num_workers)
+            for file in files:
+                pool.apply_async(self._process_file, args=(file, progress_bar))
             pool.close()
             pool.join()
-            # Updating the class attributes
-            for retrived_file, num_rows_retrived, retrived_paths in output:
-                self.retrived[self._get_file_name(retrived_file)] = num_rows_retrived
-                self.rows_retrived += num_rows_retrived
-                self.source.remove(retrived_file)
-                for retrived_path in retrived_paths:
-                    self.retrived_files.append(retrived_path)
         else:
             # Normal looping through file by file
             for file in files:
-                retrived_file, num_rows_retrived, retrived_paths = self._process_file(file, temp_folder)
-                self.retrived[self._get_file_name(retrived_file)] = num_rows_retrived
-                self.rows_retrived += num_rows_retrived
-                self.source.remove(retrived_file)
-                for retrived_path in retrived_paths:
-                    self.retrived_files.append(retrived_path)
-
+                self._process_file(file, progress_bar)
+        # Remove the temp folder after finishing
         shutil.rmtree(temp_folder)
 
 
-    def _process_file(self, filepath, temp_folder):
+    def _process_file(self, filepath, progress_bar):
         """Helper function to actually process file by file we call it from retrive eaither by multiprocessing or normal
 
         Args:
@@ -121,7 +126,7 @@ class FlightsRaw():
         Returns:
             tuple: tuple of (filepath, num_rows, retrived_files) to update the class attributes
         """
-        
+        temp_folder = os.path.join(os.getcwd(), '.temp')
         columns = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'DepTime', 'CRSDepTime',
                    'ArrTime', 'CRSArrTime', 'UniqueCarrier', 'FlightNum', 'TailNum',
                    'ActualElapsedTime', 'CRSElapsedTime', 'AirTime', 'ArrDelay',
@@ -182,11 +187,10 @@ class FlightsRaw():
         if not os.path.isdir(target_dir):
             os.mkdir(target_dir)
         filename = self._get_file_name(filepath)
-        retrived_files = []
+        # retrived_files = []
+        progress_bar.set_description(f"Retriving... file: {filename}")
         for month in months:
-            # Writing to the terminal instead of jupyter to remove noise
-            stdout.write(f'Retriving... month: {str(month)} from file: {filename} ')
-            stdout.flush()
+            progress_bar.set_description(f"Retriving... file: {filename} month: {str(month)}")
             # FIltering by month
             temp_df = df[df.Month == month]
             save_path = target_dir + os.sep + str(year * 100 + month) + '.csv'
@@ -194,9 +198,14 @@ class FlightsRaw():
             # Save the dataframe to csv to temp folder then move it to target folder
             temp_df.to_csv(temp_path, index=False)
             shutil.move(temp_path, save_path)
-            retrived_files.append(save_path)
+            # retrived_files.append(save_path)
+            self.retrived_files.append(save_path)
+            progress_bar.update()
+        self.retrived[filename] = num_rows
+        self.rows_retrived += num_rows
+        self.source.remove(filepath)
+        progress_bar.set_description(f"Done... file: {filename}")
         logging.info(f'Retrived file: {filename} with total number of rows: {num_rows:,}')
-        return filepath, num_rows, retrived_files
         
     def _get_file_name(self, file_path):
         """Helper function to get the file name from file path
