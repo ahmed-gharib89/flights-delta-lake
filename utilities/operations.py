@@ -440,3 +440,7 @@ def count_nulls(dataframe):
         col:dataframe.filter(dataframe[col].isNull()).count() for col in dataframe.columns
     }
     return nulls_dict
+
+def visualize_nulls(dataframe):
+    nulls_dict = count_nulls(dataframe)
+
