@@ -14,7 +14,6 @@ from glob import glob
 from tqdm import tqdm
 import logging
 import shutil
-import psutil
 from multiprocessing import cpu_count
 import pickle
 from multiprocessing.pool import ThreadPool
