@@ -212,14 +212,22 @@ def transform_flight_bronz(dataframe):
     dataframe = _convert_number_time(dataframe, cols_to_convert)
     dataframe = (
         dataframe.select(
-            'p_Year', 'date', 'DepTime', 'CRSDepTime', 'ArrTime', 'CRSArrTime',
-            'UniqueCarrier', 'FlightNum', 'TailNum', 
+            'p_Year',
+            'date', 
+            'DepTime', 
+            'CRSDepTime', 
+            'ArrTime',
+            'CRSArrTime', 
+            'UniqueCarrier', 
+            'FlightNum', 
+            'TailNum', 
             F.col('ActualElapsedTime').cast('integer').alias('ActualElapsedTime'),
             F.col('CRSElapsedTime').cast('integer').alias('CRSElapsedTime'),
             F.col('AirTime').cast('integer').alias('AirTime'),
             F.col('ArrDelay').cast('integer').alias('ArrDelay'),
             F.col('DepDelay').cast('integer').alias('DepDelay'),
-            'Origin', 'Dest',
+            'Origin', 
+            'Dest',
             F.col('Distance').cast('integer').alias('Distance'),
             F.col('TaxiIn').cast('integer').alias('TaxiIn'),
             F.col('TaxiOut').cast('integer').alias('TaxiOut'),
@@ -263,6 +271,8 @@ def _convert_number_time(dataframe, cols_to_convert):
     Returns:
         dataframe: spark dataframe after adding the date column
     """
+    # Replace 2400 with 0 to be able to transform it to time stamp
+    dataframe = dataframe.replace(2400, 0, subset=cols_to_convert)
     for col_name in cols_to_convert:
         dataframe = (
             dataframe
@@ -283,10 +293,10 @@ def add_comments_to_table(spark, table, col_comment_dict):
     for col_name, comment in col_comment_dict.items():
         spark.sql(
             f"""
-                ALTER TABLE {table} CHANGE COLUMN {col_name} COMMENT {comment}
+                ALTER TABLE {table} CHANGE COLUMN {col_name} COMMENT '{comment}'
             """)
 
-def create_or_update_flight_gold(spark, flight_silver_table, flight_gold_table):
+def create_or_update_flight_gold(spark, flight_silver_table, flight_gold_table, flight_gold_bath):
     """Create summary table aggrigated by date
 
     Args:
@@ -294,12 +304,11 @@ def create_or_update_flight_gold(spark, flight_silver_table, flight_gold_table):
         flight_silver_table (str): name of flight silver table
         flight_gold_table (str): name of flight gold table
     """
-    spark.sql(f"""
-        DROP TABLE IF EXISTS {flight_gold_table}
-    """)
+    # spark.sql(f"""
+    #     DROP TABLE IF EXISTS {flight_gold_table}
+    # """)
 
-    spark.sql(f"""
-        CREATE TABLE {flight_gold_table} AS (
+    dataframe = spark.sql(f"""
             SELECT 
                 date,
                 COUNT(DISTINCT UniqueCarrier) AS num_carriers,
@@ -337,10 +346,14 @@ def create_or_update_flight_gold(spark, flight_silver_table, flight_gold_table):
                 date
             ORDER BY
                 date
-        )
     """)
+    print(f'Saving {flight_gold_table} table to {flight_gold_bath}')
+    dataframe.write.format('delta').save(flight_gold_bath)
+    print(f'Registering date table with name {flight_gold_table} in the metastore')
+    register_delta_table(spark, flight_gold_table, flight_gold_bath)
+    print('Done...')
 
-def create_or_update_date_table(spark, table, dim_date_table_name, dim_date_lication_path):
+def create_or_update_date_table(spark, table, dim_date_table_name, dim_date_location_path):
     """Creates or update diminsion date table by generating full years
     from minimum year found in date colum in the table to the maximum
 
@@ -365,7 +378,7 @@ def create_or_update_date_table(spark, table, dim_date_table_name, dim_date_lica
     start_date = pd.to_datetime(f'{1}{min_year}', format='%m%Y')
     end_date = pd.to_datetime(f'{1}{max_year}', format='%m%Y')
     print(f'Generating pandas dataframe for dates from {start_date.date()} to {end_date.date()}')
-    pdf = pd.DataFrame({'date': pd.date_range(start_date, end_date)})
+    pdf = pd.DataFrame({'dte': pd.date_range(start_date, end_date)})
     pdf.dte = pdf.dte.astype('str')
     print('Converting pandas df to spark df and adding more features')
     date_df = spark.createDataFrame(pdf)
@@ -386,10 +399,10 @@ def create_or_update_date_table(spark, table, dim_date_table_name, dim_date_lica
         .withColumn('quarter_year', F.concat_ws('-', F.col('year'), F.col('quarter')))
         .withColumn('sort_quarter_year', F.col('year') * 100 + F.quarter('dte'))
     )
-    print(f'Saving dim date delta table to {dim_date_lication_path}')
-    date_df.write.format('delta').save(dim_date_lication_path)
+    print(f'Saving dim date delta table to {dim_date_location_path}')
+    date_df.write.format('delta').save(dim_date_location_path)
     print(f'Registering date table with name {dim_date_table_name} in the metastore')
-    register_delta_table(spark, dim_date_table_name, dim_date_lication_path)
+    register_delta_table(spark, dim_date_table_name, dim_date_location_path)
     print('Done...')
 
 def transform_lookup_airport(dataframe):
@@ -426,21 +439,4 @@ def transform_lookup_plane(dataframe):
     )    
 
     return dataframe
-
-def count_nulls(dataframe):
-    """Count the number of nulls in each column for a given dataframe
-
-    Args:
-        dataframe (dataframe): spark dataframe
-
-    Returns:
-        dictionary: dictionary hold the column names as key and number of nulls as values
-    """
-    nulls_dict = {
-        col:dataframe.filter(dataframe[col].isNull()).count() for col in dataframe.columns
-    }
-    return nulls_dict
-
-def visualize_nulls(dataframe):
-    nulls_dict = count_nulls(dataframe)
 
