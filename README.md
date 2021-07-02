@@ -63,6 +63,7 @@ As you can see in the following flowchart
 |L_PLANE|[link](https://drive.google.com/file/d/12A4I3W3dGqwAbLjgOeLsMFkIyq8awRKD/view?usp=sharing)|Plane lookup table
 
 * Flights Dataset
+
 |col_name|data_type|Description
 | -- | -- | -- |
 |p_Year|int|Year
@@ -96,21 +97,28 @@ As you can see in the following flowchart
 |LateAircraftDelay|string|Late Aircraft Delay, in Minutes
 
 * L_AIRPORT
+
 |col_name|data_type|Description
 | -- | -- | -- |
 |Code|string|Airport Code
 |Description|string|Airport discription in the following format (city, country:name)
+
 * L_CANCELLATION
+
 |col_name|data_type|Description
 | -- | -- | -- |
 |Code|string|Cancelation code A to D
 |Description|string|Cancelation reason description
+
 * L_UNIQUE_CARRIERS
+
 |col_name|data_type|Description
 | -- | -- | -- |
 |Code|string|Unique carier code
 |Description|string|Carier description
+
 * L_PLANE
+
 |col_name|data_type|Description
 | -- | -- | -- |
 |tailnum|string|Tail Number
