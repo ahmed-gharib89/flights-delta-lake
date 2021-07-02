@@ -170,9 +170,28 @@ As you can see in the following flowchart
 
 ### Step 3: Define the Data Model
 
+### Step 3: Define the Data Model
+
 #### 3.1 Conceptual Data Model
 
 ![Flights_Schema](images/Flights_Schema.png)
+
+#### Connect to BI tools
+
+Users can connect to the data model using power BI and the provided M function provided by the microsoft MVP Gerhard Brueckl [here](https://github.com/gbrueckl/connectors/blob/master/powerbi/fn_ReadDeltaTable.pq) </br>
+As you can see in the following screenshot
+
+![PowerBI](images/PowerBI.png)
+
+And they answer any question they want with the data like:
+
+1. What is the main reason for delays.
+2. what is the trend for the number of delayed flights by year.
+3. When is the best time of day/day of week/time of year to fly to minimise delays?
+4. Do older planes suffer more delays?
+5. How does the number of people flying between different locations change over time?
+6. How well does weather predict plane delays?
+and too many other questions
 
 #### 3.2 Mapping Out Data Pipelines
 
@@ -205,3 +224,11 @@ let's retrive the rest of the data
     We can schadule the stream to run everyday at 4am  
     3. The database needed to be accessed by 100+ people.</br>
     Delta lake can handle as many users with no issues
+
+#### Find me in social media
+
+[![Github](https://img.shields.io/badge/-Github-black?style=flat&labelColor=black&logo=github&logoColor=white "Github")](https://github.com/ahmed-gharib89 "Github")
+[![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat&logo=Linkedin&logoColor=white "LinkedIn")](https://www.linkedin.com/in/agharib89/ "LinkedIn")
+[![Facebook](https://img.shields.io/badge/-Facebook-informational?style=flat&labelColor=informational&logo=facebook&logoColor=white "Facebook")](https://www.facebook.com/a.gharib89/)
+[![Whatsapp](https://img.shields.io/badge/-Whatsapp-brightgreen?style=flat&labelColor=brightgreen&logo=whatsapp&logoColor=whiteg "Whatsapp")](https://wa.me/201096995535?text=Hello)
+[![Instagram](https://img.shields.io/badge/-Instagram-c13584?style=flat&labelColor=c13584&logo=instagram&logoColor=white "Instagram")](https://www.instagram.com/ahmed.gharib89/)
