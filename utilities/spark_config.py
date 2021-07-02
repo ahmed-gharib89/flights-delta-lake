@@ -28,10 +28,13 @@ from utilities.operations import(
     get_flight_schema,
     transform_flight_bronz,
     create_or_update_date_table,
+    create_or_update_flight_gold,
     load_csv_to_dataframe,
     transform_lookup_airport,
-    transform_lookup_plane
+    transform_lookup_plane,
+    add_comments_to_table
 )
+from utilities.explore_dfs import ExploreDfs
 
 print('importing libraries ....')
 print(
@@ -43,7 +46,7 @@ Libraries (
     stop_all_streams, stop_named_stream, until_stream_is_ready,
     register_delta_table, transform_raw, get_flight_schema,
     create_or_update_date_table, load_csv_to_dataframe,
-    transform_lookup_airport, transform_lookup_plane
+    transform_lookup_airport, transform_lookup_plane, ExploreDfs
 )
 Are available now
 """

@@ -10,7 +10,6 @@
 # Imports python modules
 import os
 import pandas as pd
-from glob import glob
 import logging
 from IPython.core.display import HTML
 from utilities.flights_raw import FlightsRaw
@@ -19,7 +18,7 @@ print('importing libraries ....')
 print(
     """
 Libraries (
-    os, pandas as pd, glob,logging, HTML, FlightsRaw
+    os, pandas as pd, logging, HTML, FlightsRaw
 )
 Are available now
 """
