@@ -7,7 +7,7 @@
 The objective for this project is to build a delta lake for US flights data </br>
 and to build ETL pipline to move the data through each table in the delta lake archticture from raw (bronz) cleaned (silver) to aggregated (gold) tables </br>
 to reach at this step to a star schema model ready for analysts to create dashboards</br>
-we will also simulate the process of receiving the raw data via streaming app like Apache Kafka 
+we will also simulate the process of receiving the raw data via streaming app like Apache Kafka
 
 The project follows the follow steps:
 
@@ -19,7 +19,7 @@ The project follows the follow steps:
 
 ### Step 1: Scope the Project and Gather Data
 
-#### Scope 
+#### Scope
 
 in this project our goal is to build a delta lake for the US flights dataset to:
 
@@ -51,7 +51,7 @@ The end outputs are actionable insights, clean data for machine learning applica
 As you can see in the following flowchart
 ![flights flowchart](images/flights_flowchart.jpg)
 
-#### Describe and Gather Data 
+#### Describe and Gather Data
 
 |Dataset|Source|Description|
 |--|--|--|
