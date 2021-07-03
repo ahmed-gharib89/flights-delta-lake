@@ -170,8 +170,6 @@ As you can see in the following flowchart
 
 ### Step 3: Define the Data Model
 
-### Step 3: Define the Data Model
-
 #### 3.1 Conceptual Data Model
 
 ![Flights_Schema](images/Flights_Schema.png)
