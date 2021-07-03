@@ -257,3 +257,21 @@ class FlightsRaw():
         self.retrived_files = state_dict['retrived_files']
 
         print(f"loaded checkpoint from {self.checkpoint + 'flight_raw.pickle'}")
+
+    def __str__(self):
+        """Prints the class attributes
+        """
+        return f"""Flight Raw Data:
+        Number of files in Source: {len(self.source):,} files
+        Target: {self.target}
+        Rows Retrived: {self.rows_retrived}
+        Number of Retrived Files: {len(self.retrived_files):,} files"""
+    
+    def __repr__(self):
+        """Prints the class attributesPy
+        """
+        return f"""Flight Raw Data:       
+        Number of files in Source: {len(self.source):,} files
+        Target: {self.target}
+        Rows Retrived: {self.rows_retrived}
+        Number of Retrived Files: {len(self.retrived_files):,} files"""
