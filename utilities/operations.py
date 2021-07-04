@@ -376,7 +376,7 @@ def create_or_update_date_table(spark, table, dim_date_table_name, dim_date_loca
     min_year = min_max_date_dict['min_date'].year
     max_year = min_max_date_dict['max_date'].year
     start_date = pd.to_datetime(f'{1}{min_year}', format='%m%Y')
-    end_date = pd.to_datetime(f'{1}{max_year}', format='%m%Y')
+    end_date = pd.to_datetime(f'{3112}{max_year}', format='%d%m%Y')
     print(f'Generating pandas dataframe for dates from {start_date.date()} to {end_date.date()}')
     pdf = pd.DataFrame({'dte': pd.date_range(start_date, end_date)})
     pdf.dte = pdf.dte.astype('str')
@@ -400,7 +400,7 @@ def create_or_update_date_table(spark, table, dim_date_table_name, dim_date_loca
         .withColumn('sort_quarter_year', F.col('year') * 100 + F.quarter('dte'))
     )
     print(f'Saving dim date delta table to {dim_date_location_path}')
-    date_df.write.format('delta').save(dim_date_location_path)
+    date_df.write.format('delta').mode('overwrite').save(dim_date_location_path)
     print(f'Registering date table with name {dim_date_table_name} in the metastore')
     register_delta_table(spark, dim_date_table_name, dim_date_location_path)
     print('Done...')
