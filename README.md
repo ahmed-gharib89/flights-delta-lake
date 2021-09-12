@@ -1,3 +1,4 @@
+[![Maintainability](https://api.codeclimate.com/v1/badges/d83cd9f703ddc588c047/maintainability)](https://codeclimate.com/github/ahmed-gharib89/flights-delta-lake/maintainability)
 # Building Delta Lake-house for flights in United states
 
 ## Data Engineering Capstone Project
