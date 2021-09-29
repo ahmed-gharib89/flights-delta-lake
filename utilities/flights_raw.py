@@ -275,3 +275,12 @@ class FlightsRaw():
         Target: {self.target}
         Rows Retrived: {self.rows_retrived:,}
         Number of Retrived Files: {len(self.retrived_files):,} files"""
+        
+    def __getitem__(self, index):
+        """Returns the file path for the given index
+        """
+        return self.source[index]
+
+    def __len__(self):
+        """Returns the number of files in the source directory"""
+        return len(self.source)
